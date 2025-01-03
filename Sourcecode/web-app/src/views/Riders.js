@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { downloadCsv } from "../common/sharedFunctions";
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from "common";
@@ -11,9 +11,9 @@ import { Typography  } from "@mui/material";
 import AlertDialog from "../components/AlertDialog";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Switch from "@mui/material/Switch";
-import moment from 'moment/min/moment-with-locales';
 import {MAIN_COLOR,SECONDORY_COLOR} from "../common/sharedFunctions"
 import EditIcon from '@mui/icons-material/Edit';
+import { formatDateTime, compareDates } from '../utils/dateUtils';
 
 export default function Users() {
   const navigate = useNavigate();
@@ -56,12 +56,12 @@ export default function Users() {
 
   useEffect(()=>{
     if(data){
-      SetSortedData(data.sort((a,b)=>(moment(b.createdAt) - moment(a.createdAt))))
+      SetSortedData(data.sort((a,b) => -compareDates(a.createdAt, b.createdAt)))
     }
   },[data,sortedData])
 
   const columns = [
-    { title: t('createdAt'), field: 'createdAt', editable:'never', defaultSort:'desc',render: rowData => rowData.createdAt? moment(rowData.createdAt).format('lll'):null},
+    { title: t('createdAt'), field: 'createdAt', editable:'never', defaultSort:'desc',render: rowData => formatDateTime(rowData.createdAt), exportTransformer: rowData => formatDateTime(rowData.createdAt)},
 
     { title: t("first_name"), field: "firstName" },
     { title: t("last_name"), field: "lastName" },

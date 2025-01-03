@@ -1,5 +1,5 @@
 import React,{ useState, useEffect } from 'react';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from 'common';
@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import {colors} from '../components/Theme/WebTheme';
 import {  useNavigate } from 'react-router-dom';
 import { SECONDORY_COLOR } from "../common/sharedFunctions";
-import moment from 'moment/min/moment-with-locales';
+import { formatDateTime } from '../utils/dateUtils';
 export default function Notifications() {
   const { t, i18n  } = useTranslation();
   const isRTL = i18n.dir();
@@ -19,7 +19,7 @@ export default function Notifications() {
     {
       title:t("createdAt"),
       field:"createdAt",
-      defaultSort:'desc',render: rowData => rowData.createdAt? moment(rowData.createdAt).format('lll'):null
+      defaultSort:'desc',render: rowData => rowData.createdAt ? formatDateTime(rowData.createdAt) : null
     },
       {
         title: t('device_type'),

@@ -12,7 +12,7 @@ import {
   RadioGroup,
   Modal,
 } from '@mui/material';
-import GoogleMapsAutoComplete from '../components/GoogleMapsAutoComplete';
+import MapAutoComplete from '../components/MapAutoComplete';
 import { useSelector, useDispatch } from "react-redux";
 import AlertDialog from '../components/AlertDialog';
 import { makeStyles } from '@mui/styles';
@@ -448,6 +448,7 @@ export default function AddBookings(props) {
   }, [estimatedata.estimate, userdata.users, estimateRequested, settings.AllowCriticalEditsAdmin, auth.profile.usertype, auth.profile.uid,t]);
  
  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if(auth.profile.usertype && auth.profile.usertype==='customer'){
       setUserCombo({
@@ -832,28 +833,17 @@ export default function AddBookings(props) {
                 : null}
             </Grid>
             <Grid item xs={12} >
-              <GoogleMapsAutoComplete
-                variant={"outlined"}
+              <MapAutoComplete
                 placeholder={t('pickup_location')}
                 value={pickupAddress}
-                className={classes.items}
-                onChange={
-                  (value) => {
-                    setPickupAddress(value);
-                  }
-                }
+                onChange={(location) => setPickupAddress(location)}
               />
             </Grid>
             <Grid item xs={12} >
-              <GoogleMapsAutoComplete placeholder={t('drop_location')}
-                variant={"outlined"}
+              <MapAutoComplete
+                placeholder={t('drop_location')}
                 value={dropAddress}
-                className={classes.items}
-                onChange={
-                  (value) => {
-                    setDropAddress(value);
-                  }
-                }
+                onChange={(location) => setDropAddress(location)}
               />
             </Grid>
             <Grid item xs={12} sm={6} >

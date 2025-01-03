@@ -1,16 +1,13 @@
-var path = require('path')
+const webpack = require('webpack');
 
-const { override, babelInclude } = require('customize-cra')
+module.exports = function override(config) {
+  // Add the moment locales webpack plugin configuration
+  config.plugins.push(
+    new webpack.ContextReplacementPlugin(
+      /dayjs[/\\]locale$/,
+      /en|es/
+    )
+  );
 
-module.exports = function (config, env) {
-  return Object.assign(
-    config,
-    override(
-      babelInclude([
-        /* transpile (converting to es5) code in src/ and shared component library */
-        path.resolve('src'),
-        path.resolve('../common'),
-      ])
-    )(config, env)
-  )
-}
+  return config;
+}; 

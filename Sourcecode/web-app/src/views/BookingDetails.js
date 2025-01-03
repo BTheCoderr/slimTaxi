@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { colors } from "../components/Theme/WebTheme";
-import moment from "moment/min/moment-with-locales";
+import { formatDateTime } from '../utils/dateUtils';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { makeStyles } from "@mui/styles";
 import { MAIN_COLOR, SECONDORY_COLOR } from "../common/sharedFunctions"
@@ -183,9 +183,7 @@ function BookingDetails() {
                         },
                       },
                       {
-                        key: "trip_start_date", label: t("trip_start_date"), value: data?.tripdate
-                          ? moment(data?.tripdate).format("lll")
-                          : ""
+                        key: "trip_start_date", label: t("trip_start_date"), value: formatDateTime(data?.tripdate)
                       },
                       { key: "trip_start_time", label: t("trip_start_time"), value: data?.trip_start_time },
                       { key: "trip_end_time", label: t("trip_end_time"), value: data?.trip_end_time },

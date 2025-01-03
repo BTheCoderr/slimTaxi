@@ -4,64 +4,105 @@ import {
   FETCH_DRIVERS__EARNING_FAILED,
 } from "../store/types";
 import store from '../store/store';
-import { firebase } from '../config/configureFirebase';
-import { get, onValue } from "firebase/database";
+import { supabase } from '../services/supabase';
 
 export const fetchDriverEarnings = () => async (dispatch) => {
-
-  const {
-    bookingListRef,
-    settingsRef
-  } = firebase;
-
   dispatch({
     type: FETCH_DRIVERS_EARNING,
     payload: null
   });
 
-  const userInfo = store.getState().auth.profile;
-  const settingsdata = await get(settingsRef);
-  const settings = settingsdata.val();
+  try {
+    const userInfo = store.getState().auth.profile;
 
-  onValue(bookingListRef(userInfo.uid, userInfo.usertype), snapshot => {
-    if (snapshot.val()) {
-      const mainArr = snapshot.val();
-      var monthsName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      var renderobj = {};
-      Object.keys(mainArr).map(j => {
+    // Get settings
+    const { data: settings, error: settingsError } = await supabase
+      .from('settings')
+      .select('*')
+      .single();
 
-        if ((mainArr[j].status === 'PAID' || mainArr[j].status === 'COMPLETE') && mainArr[j].driver_share !== undefined) {
-          let bdt = new Date(mainArr[j].tripdate);
-          let uniqueKey = bdt.getFullYear() + '_' + bdt.getMonth() + '_' + mainArr[j].driver;
+    if (settingsError) throw settingsError;
+
+    // Get completed rides for the driver
+    const { data: rides, error: ridesError } = await supabase
+      .from('rides')
+      .select(`
+        *,
+        driver:driver_id(
+          id,
+          first_name,
+          last_name,
+          vehicle_number
+        )
+      `)
+      .eq('driver_id', userInfo.uid)
+      .in('status', ['PAID', 'COMPLETE'])
+      .order('created_at', { ascending: false });
+
+    if (ridesError) throw ridesError;
+
+    if (rides && rides.length > 0) {
+      const monthsName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const renderobj = {};
+
+      rides.forEach(ride => {
+        if (ride.driver_share !== undefined) {
+          const bdt = new Date(ride.created_at);
+          const uniqueKey = `${bdt.getFullYear()}_${bdt.getMonth()}_${ride.driver_id}`;
+
           if (renderobj[uniqueKey] && renderobj[uniqueKey].driverShare > 0) {
-            renderobj[uniqueKey].driverShare = (parseFloat(renderobj[uniqueKey].driverShare) + parseFloat(mainArr[j].driver_share)).toFixed(settings.decimal);
-            renderobj[uniqueKey]['total_rides'] = renderobj[uniqueKey]['total_rides'] + 1;
+            renderobj[uniqueKey].driverShare = (parseFloat(renderobj[uniqueKey].driverShare) + parseFloat(ride.driver_share)).toFixed(settings.decimal);
+            renderobj[uniqueKey].total_rides += 1;
           } else {
-            renderobj[uniqueKey] = {};
-            renderobj[uniqueKey]['dated'] = mainArr[j].tripdate;
-            renderobj[uniqueKey]['year'] = bdt.getFullYear();
-            renderobj[uniqueKey]['month'] = bdt.getMonth();
-            renderobj[uniqueKey]['monthsName'] = monthsName[bdt.getMonth()];
-            renderobj[uniqueKey]['driverName'] = mainArr[j].driver_name;
-            renderobj[uniqueKey]['driverShare'] = parseFloat(mainArr[j].driver_share).toFixed(settings.decimal);
-            renderobj[uniqueKey]['driverVehicleNo'] = mainArr[j].vehicle_number;
-            renderobj[uniqueKey]['driverUId'] = mainArr[j].driver;
-            renderobj[uniqueKey]['uniqueKey'] = uniqueKey;
-            renderobj[uniqueKey]['total_rides'] = 1;
+            renderobj[uniqueKey] = {
+              dated: ride.created_at,
+              year: bdt.getFullYear(),
+              month: bdt.getMonth(),
+              monthsName: monthsName[bdt.getMonth()],
+              driverName: `${ride.driver.first_name} ${ride.driver.last_name}`,
+              driverShare: parseFloat(ride.driver_share).toFixed(settings.decimal),
+              driverVehicleNo: ride.driver.vehicle_number,
+              driverUId: ride.driver_id,
+              uniqueKey: uniqueKey,
+              total_rides: 1
+            };
           }
         }
-        return null;
       });
-      if (renderobj) {
-        const arr = Object.keys(renderobj).map(i => {
-          renderobj[i].driverShare = parseFloat(renderobj[i].driverShare).toFixed(settings.decimal)
-          return renderobj[i]
-        })
-        dispatch({
-          type: FETCH_DRIVERS__EARNING_SUCCESS,
-          payload: arr
-        });
-      }
+
+      const arr = Object.keys(renderobj).map(i => ({
+        ...renderobj[i],
+        driverShare: parseFloat(renderobj[i].driverShare).toFixed(settings.decimal)
+      }));
+
+      dispatch({
+        type: FETCH_DRIVERS__EARNING_SUCCESS,
+        payload: arr
+      });
+
+      // Set up real-time subscription for new earnings
+      const subscription = supabase
+        .channel('driver_earnings')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'rides',
+            filter: `driver_id=eq.${userInfo.uid}`
+          },
+          () => {
+            // Refresh earnings when there are changes
+            dispatch(fetchDriverEarnings());
+          }
+        )
+        .subscribe();
+
+      // Store subscription for cleanup
+      store.dispatch({
+        type: 'STORE_SUBSCRIPTION',
+        payload: { id: 'driver_earnings', subscription }
+      });
 
     } else {
       dispatch({
@@ -69,6 +110,11 @@ export const fetchDriverEarnings = () => async (dispatch) => {
         payload: "No data available."
       });
     }
-  });
+  } catch (error) {
+    dispatch({
+      type: FETCH_DRIVERS__EARNING_FAILED,
+      payload: error.message
+    });
+  }
 };
 

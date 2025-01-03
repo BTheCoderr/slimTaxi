@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
 import { Typography, Grid, Card, Button } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import moment from "moment/min/moment-with-locales";
+import dayjs from '../config/date-config';
 import { colors } from "../components/Theme/WebTheme";
 import { useNavigate } from "react-router-dom";
 import { MAIN_COLOR, SECONDORY_COLOR } from "../common/sharedFunctions";
 import { api } from "common";
+import { formatDateTime } from '../utils/dateUtils';
 
 const UserWalletDetails = (props) => {
     const { data } = props;
@@ -36,7 +37,7 @@ const UserWalletDetails = (props) => {
             title: t("requestDate"),
             field: "date",
             render: (rowData) =>
-                rowData.date ? moment(rowData.date).format("lll") : null,
+                rowData.date ? formatDateTime(rowData.date) : null,
         },
         {
             title: t("amount"),

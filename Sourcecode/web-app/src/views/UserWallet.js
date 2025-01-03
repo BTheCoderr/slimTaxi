@@ -1,5 +1,5 @@
 import React,{ useState, useEffect, useRef } from 'react';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import {
   Grid,
   Typography,
@@ -15,7 +15,7 @@ import { makeStyles } from '@mui/styles';
 import { useSelector, useDispatch } from "react-redux";
 import { api } from 'common';
 import { useTranslation } from "react-i18next";
-import moment from 'moment/min/moment-with-locales';
+import dayjs from '../config/date-config';
 import WalletCard from '../components/WalletCard';
 import AlertDialog from '../components/AlertDialog';
 import AlertDialogTwoButton from '../components/AlertDialogTwoButton';
@@ -121,7 +121,9 @@ const UserWallet = (props) => {
   const [selectedProviderIndex, setSelectedProviderIndex] = useState(0);
   const [paymentModalStatus, setPaymentModalStatus] = useState(false);
   const columns =  [
-      { title: t('requestDate'), field: 'date', defaultSort:'desc', render: rowData => rowData.date ? moment(rowData.date).format('lll') : null,},
+      { title: t('requestDate'), field: 'date', defaultSort:'desc', 
+        render: rowData => rowData.date ? dayjs(rowData.date).format('lll') : null,
+      },
       { title: t('amount'), field: 'amount',editable: 'never',
         render: (rowData) =>
         rowData.amount

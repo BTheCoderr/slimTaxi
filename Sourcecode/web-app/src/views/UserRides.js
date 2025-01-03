@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { downloadCsv } from "../common/sharedFunctions";
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import { useSelector } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Typography, Button } from "@mui/material";
-import moment from "moment/min/moment-with-locales";
+import { formatDateTime } from '../utils/dateUtils';
 import { MAIN_COLOR, SECONDORY_COLOR } from "../common/sharedFunctions";
 import { colors } from "../components/Theme/WebTheme";
 
@@ -81,7 +81,7 @@ export default function UserRides({data,tabid}) {
       title: t("booking_date"),
       field: "bookingDate",
       render: (rowData) =>
-        rowData.bookingDate ? moment(rowData.bookingDate).format("lll") : null,
+        rowData.bookingDate ? formatDateTime(rowData.bookingDate) : null,
       cellStyle: {
         textAlign: "center",
         border: "1px solid rgba(224, 224, 224, 1)",

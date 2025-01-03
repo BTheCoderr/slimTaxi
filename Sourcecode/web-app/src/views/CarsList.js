@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from "common";
@@ -14,7 +14,7 @@ import Tooltip from "@mui/material/Tooltip";
 import TextField from "@mui/material/TextField";
 import { Autocomplete } from "@mui/material";
 import { colors } from "../components/Theme/WebTheme";
-import moment from "moment/min/moment-with-locales";
+import dayjs from "dayjs";
 import Switch from "@mui/material/Switch";
 import { useNavigate } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
@@ -174,7 +174,7 @@ export default function CarsList() {
       editable: "never",
       defaultSort: "desc",
       render: (rowData) =>
-        rowData.createdAt ? moment(rowData.createdAt).format("lll") : null,
+        rowData.createdAt ? dayjs(rowData.createdAt).format("lll") : null,
     },
     {
       title: t("driver"),

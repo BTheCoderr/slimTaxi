@@ -4,9 +4,10 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Typography, Grid, Card, Avatar, Button } from "@mui/material";
 import { colors } from "../components/Theme/WebTheme";
-import moment from "moment/min/moment-with-locales";
+import dayjs from '../config/date-config';
 import { useNavigate } from "react-router-dom";
 import { MAIN_COLOR, SECONDORY_COLOR } from "../common/sharedFunctions";
+import { formatDateTime } from '../utils/dateUtils';
 
 function DriverCars() {
   const { id } = useParams();
@@ -247,7 +248,7 @@ function DriverCars() {
                             }}
                           >
                             {activeCar?.createdAt
-                              ? moment(activeCar?.createdAt).format("lll")
+                              ? formatDateTime(activeCar?.createdAt)
                               : null}
                           </Typography>
                         </Card>
@@ -714,7 +715,7 @@ function DriverCars() {
                               }}
                             >
                               {item?.createdAt
-                                ? moment(item?.createdAt).format("lll")
+                                ? formatDateTime(item?.createdAt)
                                 : null}
                             </Typography>
                           </Grid>

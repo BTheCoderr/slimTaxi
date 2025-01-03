@@ -1,5 +1,5 @@
 import React,{ useState, useEffect, useRef } from 'react';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from 'common';
@@ -8,7 +8,7 @@ import {colors} from '../components/Theme/WebTheme';
 import { downloadCsv } from '../common/sharedFunctions';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useNavigate } from 'react-router-dom';
-import moment from 'moment/min/moment-with-locales';
+import { compareDates } from '../utils/dateUtils';
 import {SECONDORY_COLOR } from "../common/sharedFunctions";
 export default function Users() {
   const { t,i18n } = useTranslation();
@@ -40,7 +40,7 @@ export default function Users() {
 
   useEffect(()=>{
     if(sortedData){
-      SetSortedData(data.sort((a,b)=>(moment(b.createdAt) - moment(a.createdAt))))
+      SetSortedData(data.sort((a,b) => -compareDates(a.createdAt, b.createdAt)))
     }
   },[data,sortedData])
 

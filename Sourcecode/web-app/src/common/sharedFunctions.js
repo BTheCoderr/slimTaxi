@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment/min/moment-with-locales';
+import dayjs from '../config/date-config';
 import { colors } from "../components/Theme/WebTheme";
 import {
   Typography,
@@ -10,17 +10,17 @@ import {
 } from '@mui/material';
 import { useTranslation } from "react-i18next";
 import OtherPerson from 'components/OtherPerson';
+
 export const calcEst = false;
 export const showEst = true;
 export const optionsRequired = false;
-
 
 export const MAIN_COLOR = colors.TAXIPRIMARY;
 export const SECONDORY_COLOR = colors.TAXISECONDORY;
 
 export const bookingHistoryColumns = (role, settings, t, isRTL) => [
   { title: t('booking_ref'), field: 'reference'},
-  { title: t('booking_date'), field: 'bookingDate', render: rowData => rowData.bookingDate?moment(rowData.bookingDate).format('lll'):null},
+  { title: t('booking_date'), field: 'bookingDate', render: rowData => rowData.bookingDate ? dayjs(rowData.bookingDate).format('lll') : null},
   { title: t('car_type'), field: 'carType'},
   { title: t('assign_driver'), field: 'driver_name'},
   { title: t('booking_status_web'), field: 'status',

@@ -1,11 +1,11 @@
 import React,{ useState, useEffect } from 'react';
 import { downloadCsv } from '../common/sharedFunctions';
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import CircularLoading from "../components/CircularLoading";
 import { useSelector, useDispatch } from "react-redux";
 import { api } from 'common';
 import { useTranslation } from "react-i18next";
-import moment from 'moment/min/moment-with-locales';
+import dayjs from 'dayjs';
 import {colors} from '../components/Theme/WebTheme';
 import { SECONDORY_COLOR } from "../common/sharedFunctions";
 const Withdraws = () => {
@@ -20,7 +20,7 @@ const Withdraws = () => {
   const columns =  [
     { title: 'ID', field: 'id',editable: 'never',
   },
-    { title: t('requestDate'), field: 'date', defaultSort:'desc', render: rowData => rowData.date ? moment(rowData.date).format('lll') : null,
+    { title: t('requestDate'), field: 'date', defaultSort:'desc', render: rowData => rowData.date ? dayjs(rowData.date).format('lll') : null,
               exportTransformer: (rowData) => new Date(rowData.date).toLocaleDateString() + ' '+ new Date(rowData.date).toLocaleTimeString()},
     { title: t('driver_name'),field: 'name',editable: 'never', 
   },
@@ -36,7 +36,7 @@ const Withdraws = () => {
   },
     { title: t('processed'), field: 'processed', type: 'boolean',editable: 'never', 
   },  
-    { title: t('processDate'), field: 'processDate', render: rowData => rowData.processDate ? moment(rowData.processDate).format('lll') : null,
+    { title: t('processDate'), field: 'processDate', render: rowData => rowData.processDate ? dayjs(rowData.processDate).format('lll') : null,
   },
     { title: t('bankName'), field: 'bankName', hidden: settings.bank_fields===false? true: false,editable: 'never'},
     { title: t('bankCode'), field: 'bankCode' , hidden: settings.bank_fields===false? true: false,editable: 'never'},

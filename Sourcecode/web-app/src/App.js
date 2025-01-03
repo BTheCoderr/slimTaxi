@@ -1,131 +1,195 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, } from 'react-router-dom'
-import LandingPage from "./views/LandingPage.js";
-import LoginPage from "./views/LoginPage.js";
-import PrivacyPolicy from "./views/PrivacyPolicy.js";
-import AboutUs from "./views/AboutUs";
-import AuthLoading from './views/AuthLoading';
-import { Provider } from "react-redux";
-import ProtectedRoute from './views/ProtectedRoute';
-import MyProfile from './views/MyProfile';
-import BookingHistory from './views/BookingHistory';
-import Dashboard from './views/Dashboard';
-import CarTypes from './views/CarTypes';
-import AddBookings from './views/AddBookings';
-import Promos from './views/Promos';
-import Users from './views/Users';
-import CustomerDetails from "views/CustomerDetails.js";
-import Notifications from './views/Notifications';
-import Settings from './views/Settings.js';
-import Complain from "views/Complain.js";
-import AddMoney from "./views/AddMoney";
-import Withdraws from './views/Withdraws';
-import AllReports from "./views/AllReports";
-import { FirebaseProvider, store } from "common";
-import { FirebaseConfig } from './config/FirebaseConfig';
-import { GoogleMapApiConfig } from './config/GoogleMapApiConfig';
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import ContactUs from "./views/ContactUs";
-import UserWallet from "./views/UserWallet";
-import CarsList from "./views/CarsList";
-import { ThemeProvider } from '@mui/styles';
-import { createTheme } from '@mui/material';
-import { useJsApiLoader } from '@react-google-maps/api';
-import TermCondition from "views/TermCondition.js";
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { webClientId } from "config/ClientIds.js";
-import { HelmetProvider } from "react-helmet-async";
-import Sos from './views/Sos';
-import DriverDetails from "views/DriverDetails.js";
-import Error from "views/Error.js";
-import BookingDetails from "views/BookingDetails.js";
-import UserDocuments from "views/UserDocuments.js";
-import AddNotifications from "views/AddNotifications.js";
-import EditPromo from "views/EditPromo.js";
-import EditCar from "views/EditCar.js";
-import EditCarType from "views/EditCarType.js";
-import EditUser from "views/EditUser.js";
-import PaymentSettings from "views/PaymentSettings.js";
-const libraries = ['geometry','drawing','places'];
+import React, { startTransition } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
+import './i18n';
 
-i18n
-.use(initReactI18next) 
-.init({
-    resources: {},
-    fallbackLng: "en",
-    ns: ["translations"],
-    defaultNS: "translations",
-    interpolation: {
-        escapeValue: false
-    }
+// Auth & Core Pages
+import LoginPage from './views/LoginPage';
+import RegistrationPage from './views/RegistrationPage';
+import Dashboard from './views/Dashboard';
+import AuthLoading from './views/AuthLoading';
+import ProtectedRoute from './views/ProtectedRoute';
+
+// Booking Related
+import BookingPage from './views/BookingPage';
+import AddBookings from './views/AddBookings';
+import BookingDetails from './views/BookingDetails';
+import BookingHistory from './views/BookingHistory';
+
+// User Management
+import Users from './views/Users';
+import Riders from './views/Riders';
+import Drivers from './views/Drivers';
+import EditUser from './views/EditUser';
+import MyProfile from './views/MyProfile';
+import UserDocuments from './views/UserDocuments';
+
+// Settings & Configuration
+import Settings from './views/Settings';
+import GeneralSettings from './views/GeneralSettings';
+import PaymentSettings from './views/PaymentSettings';
+import CarTypes from './views/CarTypes';
+import EditCarType from './views/EditCarType';
+
+// Wallet & Payments
+import UserWallet from './views/UserWallet';
+import AddMoney from './views/AddMoney';
+import Withdraws from './views/Withdraws';
+import DriverEarning from './views/DriverEarning';
+
+// Additional Features
+import Notifications from './views/Notifications';
+import AddNotifications from './views/AddNotifications';
+import Promos from './views/Promos';
+import AboutUs from './views/AboutUs';
+import PrivacyPolicy from './views/PrivacyPolicy';
+import TermCondition from './views/TermCondition';
+import ContactUs from './views/ContactUs';
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <AuthLoading />,
+    errorElement: <div>Something went wrong!</div>
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/register",
+    element: <RegistrationPage />,
+  },
+  {
+    path: "/dashboard",
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
+  },
+  // Booking Routes
+  {
+    path: "/bookings",
+    element: <ProtectedRoute><BookingPage /></ProtectedRoute>,
+  },
+  {
+    path: "/add-booking",
+    element: <ProtectedRoute><AddBookings /></ProtectedRoute>,
+  },
+  {
+    path: "/booking/:id",
+    element: <ProtectedRoute><BookingDetails /></ProtectedRoute>,
+  },
+  {
+    path: "/booking-history",
+    element: <ProtectedRoute><BookingHistory /></ProtectedRoute>,
+  },
+  // User Management Routes
+  {
+    path: "/users",
+    element: <ProtectedRoute><Users /></ProtectedRoute>,
+  },
+  {
+    path: "/riders",
+    element: <ProtectedRoute><Riders /></ProtectedRoute>,
+  },
+  {
+    path: "/drivers",
+    element: <ProtectedRoute><Drivers /></ProtectedRoute>,
+  },
+  {
+    path: "/edit-user/:id",
+    element: <ProtectedRoute><EditUser /></ProtectedRoute>,
+  },
+  {
+    path: "/profile",
+    element: <ProtectedRoute><MyProfile /></ProtectedRoute>,
+  },
+  {
+    path: "/documents",
+    element: <ProtectedRoute><UserDocuments /></ProtectedRoute>,
+  },
+  // Settings Routes
+  {
+    path: "/settings",
+    element: <ProtectedRoute><Settings /></ProtectedRoute>,
+  },
+  {
+    path: "/settings/general",
+    element: <ProtectedRoute><GeneralSettings /></ProtectedRoute>,
+  },
+  {
+    path: "/settings/payment",
+    element: <ProtectedRoute><PaymentSettings /></ProtectedRoute>,
+  },
+  {
+    path: "/car-types",
+    element: <ProtectedRoute><CarTypes /></ProtectedRoute>,
+  },
+  {
+    path: "/car-types/:id",
+    element: <ProtectedRoute><EditCarType /></ProtectedRoute>,
+  },
+  // Wallet Routes
+  {
+    path: "/wallet",
+    element: <ProtectedRoute><UserWallet /></ProtectedRoute>,
+  },
+  {
+    path: "/add-money",
+    element: <ProtectedRoute><AddMoney /></ProtectedRoute>,
+  },
+  {
+    path: "/withdraws",
+    element: <ProtectedRoute><Withdraws /></ProtectedRoute>,
+  },
+  {
+    path: "/earnings",
+    element: <ProtectedRoute><DriverEarning /></ProtectedRoute>,
+  },
+  // Additional Routes
+  {
+    path: "/notifications",
+    element: <ProtectedRoute><Notifications /></ProtectedRoute>,
+  },
+  {
+    path: "/add-notification",
+    element: <ProtectedRoute><AddNotifications /></ProtectedRoute>,
+  },
+  {
+    path: "/promos",
+    element: <ProtectedRoute><Promos /></ProtectedRoute>,
+  },
+  // Static Pages
+  {
+    path: "/about",
+    element: <AboutUs />,
+  },
+  {
+    path: "/privacy",
+    element: <PrivacyPolicy />,
+  },
+  {
+    path: "/terms",
+    element: <TermCondition />,
+  },
+  {
+    path: "/contact",
+    element: <ContactUs />,
+  }
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  },
+  basename: process.env.PUBLIC_URL
 });
 
 function App() {
-
-  useJsApiLoader({
-    id: 'google-map',
-    googleMapsApiKey: GoogleMapApiConfig + "&loading=async",
-    libraries
-  })
-
-  const theme = createTheme()
-
   return (
-    <HelmetProvider>
-    <Provider store={store}>
-      <FirebaseProvider config={FirebaseConfig}>
-        <GoogleOAuthProvider clientId={webClientId}>
-        <ThemeProvider theme={theme}>
-          <AuthLoading>
-           <BrowserRouter>
-              <Routes>
-                <Route path="/dashboard" element={<ProtectedRoute permit={"admin,fleetadmin"}><Dashboard /></ProtectedRoute>}/>
-                <Route path="/bookings" element={<ProtectedRoute permit={"customer,admin,driver,fleetadmin"}><BookingHistory /></ProtectedRoute>}/>
-                <Route path="/bookings/bookingdetails/:id" element={<ProtectedRoute permit={"customer,admin,driver,fleetadmin"}><BookingDetails /></ProtectedRoute>}/>
-                <Route path="/profile" element={<ProtectedRoute permit={"customer,admin,driver,fleetadmin"}><MyProfile /></ProtectedRoute>}/>
-                <Route path="/cartypes" element={<ProtectedRoute permit={"admin"}><CarTypes /></ProtectedRoute>}/>
-                <Route path="/cars" element={<ProtectedRoute permit={"admin,fleetadmin,driver"}><CarsList /></ProtectedRoute>}/>
-                <Route path="/addbookings" element={<ProtectedRoute permit={"admin,fleetadmin,customer"}><AddBookings /></ProtectedRoute>}/>
-                <Route path="/promos" element={<ProtectedRoute permit={"admin"}><Promos /></ProtectedRoute>}/>
-                <Route path="/users/:id" element={<ProtectedRoute permit={"admin,fleetadmin"}><Users /></ProtectedRoute>}/>
-                <Route path="/users/customerdetails/:id" element={<ProtectedRoute permit={"admin,fleetadmin"}><CustomerDetails/></ProtectedRoute>}/>
-                <Route path="/users/driverdetails/:id" element={<ProtectedRoute permit={"admin,fleetadmin"}><DriverDetails/></ProtectedRoute>}/>
-                <Route path="/users/userdocuments/:rId/:id" element={<ProtectedRoute permit={"admin,fleetadmin"}><UserDocuments/></ProtectedRoute>} />  
-                <Route path="/notifications" element={<ProtectedRoute permit={"admin"}><Notifications /></ProtectedRoute>}/>
-                <Route path="/addtowallet" element={<ProtectedRoute permit={"admin"}><AddMoney /></ProtectedRoute>}/>
-                <Route path="/userwallet" element={<ProtectedRoute permit={"customer,driver"}><UserWallet /></ProtectedRoute>}/>
-                <Route path="/withdraws" element={<ProtectedRoute permit={"admin"}><Withdraws /></ProtectedRoute>}/>
-                <Route path="/sos" element={<ProtectedRoute permit={"admin"}><Sos /></ProtectedRoute>}/>
-                <Route path="/complain" element={<ProtectedRoute permit={"admin"}><Complain /></ProtectedRoute>}/>
-                <Route path="/allreports" element={<ProtectedRoute permit={"admin,fleetadmin"}><AllReports /></ProtectedRoute>}/>
-                <Route path="/settings" element={<ProtectedRoute permit={"admin"}><Settings /></ProtectedRoute>}/>
-                <Route path="/paymentsettings" element={<ProtectedRoute permit={"admin"}><PaymentSettings /></ProtectedRoute>}/>
-                <Route path="/contact-us" element={<ContactUs />} />
-                <Route path="/about-us" element={<AboutUs />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/term-condition" element={<TermCondition />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/users/edituser/:usertype" element={<ProtectedRoute permit={"admin,fleetadmin"}><EditUser/></ProtectedRoute>}/>
-                <Route path="/users/edituser/:usertype/:id" element={<ProtectedRoute permit={"admin,fleetadmin"}><EditUser/></ProtectedRoute>}/>
-                <Route path="/notifications/addnotifications" element={<ProtectedRoute permit={"admin"}><AddNotifications/></ProtectedRoute>}/>
-                <Route path="/cars/editcar" element={<ProtectedRoute permit={"admin,fleetadmin,driver"}><EditCar/></ProtectedRoute>}/>
-                <Route path="/cars/editcar/:id" element={<ProtectedRoute permit={"admin,fleetadmin,driver"}><EditCar/></ProtectedRoute>}/>
-                <Route path="/promos/editpromo" element={<ProtectedRoute permit={"admin"}><EditPromo/></ProtectedRoute>}/>
-                <Route path="/promos/editpromo/:id" element={<ProtectedRoute permit={"admin"}><EditPromo/></ProtectedRoute>}/>
-                <Route path="/contact-us" element={<ContactUs />} />
-                <Route path="/cartypes/editcartype" element={<ProtectedRoute permit={"admin,fleetadmin,driver"} ><EditCarType/></ProtectedRoute>} />
-                <Route path="/cartypes/editcartype/:id" element={<ProtectedRoute permit={"admin,fleetadmin,driver"}><EditCarType/></ProtectedRoute>}/>
-                <Route path="/*" element={<Error/>} />
-                <Route path="/" element={<LandingPage />} />
-              </Routes>
-            </BrowserRouter>
-          </AuthLoading>
-        </ThemeProvider>
-        </GoogleOAuthProvider>
-      </FirebaseProvider>
-    </Provider>
-    </HelmetProvider>
+    <React.StrictMode>
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
+    </React.StrictMode>
   );
 }
 

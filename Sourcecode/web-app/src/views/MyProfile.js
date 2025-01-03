@@ -10,7 +10,7 @@ import { makeStyles } from '@mui/styles';
 import AlertDialog from '../components/AlertDialog';
 import { FirebaseContext, api } from 'common';
 import { useTranslation } from "react-i18next";
-import moment from 'moment/min/moment-with-locales';
+import dayjs from 'dayjs';
 import CardContent from '@mui/material/CardContent';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -273,7 +273,7 @@ const MyProfile = () => {
     const lang = multiLanguage[arr[langSelection]];
     i18n.addResourceBundle(multiLanguage[arr[langSelection]].langLocale, 'translations', multiLanguage[arr[langSelection]].keyValuePairs);
     i18n.changeLanguage(lang.langLocale);
-    moment.locale(lang.dateLocale);
+    dayjs.locale(lang.dateLocale);
     setSelectedImage(null);
     setCommonAlert({ open: true, msg: t('profile_updated') });
   }

@@ -1,12 +1,13 @@
 import React,{ useState, useEffect } from 'react';
 import { downloadCsv } from '../common/sharedFunctions';
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import CircularLoading from "../components/CircularLoading";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import moment from 'moment/min/moment-with-locales';
+import dayjs from '../config/date-config';
 import {colors} from '../components/Theme/WebTheme';
 import {SECONDORY_COLOR} from "../common/sharedFunctions"
+import { formatDateTime } from '../utils/dateUtils';
 
 const Sos = () => {
   const { t,i18n } = useTranslation();
@@ -18,7 +19,7 @@ const Sos = () => {
     { title: t('contact'),field: 'contact',editable: 'never',render: (rowData) =>
     settings.AllowCriticalEditsAdmin ? rowData.contact : t("hidden_demo"),},
     { title: t('user_type'),field: 'user_type',editable: 'never'},
-    { title: t('complain_date'), field: 'complainDate', editable:'never', defaultSort:'desc',render: rowData => rowData.complainDate? moment(rowData.complainDate).format('lll'):null},
+    { title: t('complain_date'), field: 'complainDate', editable:'never', defaultSort:'desc',render: rowData => formatDateTime(rowData.complainDate), exportTransformer: rowData => formatDateTime(rowData.complainDate)},
   ];
   const [data, setData] = useState([]);
   const sosdata = useSelector(state => state.sosdata);

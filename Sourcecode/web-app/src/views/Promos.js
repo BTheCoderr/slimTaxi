@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from 'common';
 import { useTranslation } from "react-i18next";
-import moment from 'moment/min/moment-with-locales';
+import { formatDateTime, compareDates, parseDate } from '../utils/dateUtils';
 import {colors} from '../components/Theme/WebTheme';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -79,16 +79,14 @@ export default function Promos() {
         <DateTimePicker
           inputRef={inputRef}
           renderInput={(props) => <TextField {...props} variant='outlined' className={classes.dateTimePickerInput} />}
-          label="DateTimePicker"
-          value={props.rowData.promo_validity ? props.rowData.promo_validity : new Date()}
-          onChange={(newValue) => {
-            props.onChange(newValue)
-          }}
+          label={t('end_date')}
+          value={props.rowData.promo_validity ? parseDate(props.rowData.promo_validity) : null}
+          onChange={(newValue) => props.onChange(newValue)}
           autoFocus={false}
         />
       </LocalizationProvider>
     ),
-    render: rowData => rowData.promo_validity?moment(rowData.promo_validity).format('lll'):null,
+    render: rowData => formatDateTime(rowData.promo_validity)
   },
     { title: t('promo_usage'), field: 'promo_usage_limit', type: 'numeric',
   },
@@ -131,7 +129,7 @@ export default function Promos() {
 
   useEffect(()=>{
     if(data){
-      SetSortedData(data.sort((a,b)=>(moment(b.createdAt) - moment(a.createdAt))))
+      SetSortedData(data.sort((a,b) => -compareDates(a.createdAt, b.createdAt)))
     }
   },[data])
 

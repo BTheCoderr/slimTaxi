@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from "common";

@@ -3,7 +3,7 @@ import CircularLoading from "../components/CircularLoading";
 import { useSelector, useDispatch } from "react-redux";
 import ConfirmationDialogRaw from "../components/ConfirmationDialogRaw";
 import { SECONDORY_COLOR, downloadCsv } from "../common/sharedFunctions";
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import {
   Grid,
   Typography,

@@ -1,172 +1,91 @@
-import React, { useEffect } from "react";
-import CircularLoading from "../components/CircularLoading";
-import { useSelector, useDispatch } from "react-redux";
-import { api } from "common";
-import i18n from "i18next";
-import { useTranslation } from "react-i18next";
-import moment from "moment/min/moment-with-locales";
+import React, { useEffect, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { supabase } from '../config/SupabaseConfig';
+import { setUser, clearUser } from '../redux/actions/authActions';
+import CircularLoading from '../components/CircularLoading';
+import { Box, Typography } from '@mui/material';
 
-function AuthLoading(props) {
-  const { t } = useTranslation();
-  const {
-    fetchUser,
-    fetchCarTypes,
-    fetchSettings,
-    fetchBookings,
-    fetchCancelReasons,
-    fetchPromos,
-    fetchDriverEarnings,
-    fetchUsers,
-    fetchNotifications,
-    fetchEarningsReport,
-    signOff,
-    fetchWithdraws,
-    fetchPaymentMethods,
-    fetchLanguages,
-    fetchWalletHistory,
-    fetchCars,
-    fetchComplain,
-    fetchSMTP,
-    fetchSos,
-    fetchSMSConfig
-  } = api;
+export default function AuthLoading() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.auth);
-  const languagedata = useSelector((state) => state.languagedata);
-  const settingsdata = useSelector((state) => state.settingsdata);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    dispatch(fetchSettings());
-  }, [dispatch, fetchSettings]);
+  const checkUser = useCallback(async () => {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) throw userError;
+      
+      if (user) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-  useEffect(() => {
-    let obj = {};
-    let def1 = {};
-    if (languagedata.langlist) {
-      for (const value of Object.values(languagedata.langlist)) {
-        obj[value.langLocale] = value.keyValuePairs;
-        if (value.default === true) {
-          def1 = value;
-          break;
-        }
-      }
-      if(def1 && def1.langLocale){
-        const result = localStorage.getItem('lang');
-        if (result) {
-          let langLocale = JSON.parse(result)['langLocale'];
-          let dateLocale = JSON.parse(result)['dateLocale'];
-          i18n.addResourceBundle(
-            langLocale,
-            "translations",
-            obj[langLocale]
-          );
-          i18n.changeLanguage(langLocale);
-          moment.locale(dateLocale);
-        } else {
-          i18n.addResourceBundle(
-            def1.langLocale,
-            "translations",
-            obj[def1.langLocale]
-          );
-          i18n.changeLanguage(def1.langLocale);
-          moment.locale(def1.dateLocale);
-        }
-      }
+        if (profileError) throw profileError;
 
-      dispatch(fetchUser());
-    }
-  }, [languagedata, dispatch, fetchUser]);
-
-  useEffect(() => {
-    if (settingsdata.settings) {
-      dispatch(fetchLanguages());
-      dispatch(fetchCarTypes());
-      document.title = settingsdata.settings.appName;
-    }
-  }, [settingsdata.settings, dispatch, fetchLanguages, fetchCarTypes]);
-
-  useEffect(() => {
-    if (auth.profile) {
-      if (auth.profile.usertype) {
-        let role = auth.profile.usertype;
-        if (role === "customer") {
-          dispatch(fetchBookings());
-          dispatch(fetchWalletHistory());
-          dispatch(fetchPaymentMethods());
-          dispatch(fetchCancelReasons());
-          dispatch(fetchUsers());
-        } else if (role === "driver") {
-          dispatch(fetchBookings());
-          dispatch(fetchWithdraws());
-          dispatch(fetchPaymentMethods());
-          dispatch(fetchCars());
-          dispatch(fetchWalletHistory());
-        } else if (role === "admin") {
-          dispatch(fetchUsers());
-          dispatch(fetchBookings());
-          dispatch(fetchPromos());
-          dispatch(fetchDriverEarnings());
-          dispatch(fetchNotifications());
-          dispatch(fetchEarningsReport());
-          dispatch(fetchCancelReasons());
-          dispatch(fetchWithdraws());
-          dispatch(fetchComplain());
-          dispatch(fetchPaymentMethods());
-          dispatch(fetchCars());
-          dispatch(fetchSMTP());
-          dispatch(fetchSMSConfig());
-          dispatch(fetchSos());
-        } else if (role === "fleetadmin") {
-          dispatch(fetchUsers());
-          dispatch(fetchBookings());
-          dispatch(fetchDriverEarnings());
-          dispatch(fetchCars());
-          dispatch(fetchCancelReasons());
-          dispatch(fetchPaymentMethods());
-        } else {
-          alert(t("not_valid_user_type"));
-          dispatch(signOff());
-        }
+        dispatch(setUser({ ...user, profile }));
+        navigate('/dashboard');
       } else {
-        alert(t("user_issue_contact_admin"));
-        dispatch(signOff());
+        navigate('/login');
       }
+    } catch (error) {
+      console.error('Error checking auth state:', error);
+      setError(error.message);
+      setTimeout(() => navigate('/login'), 3000);
     }
-  }, [
-    auth.profile,
-    dispatch,
-    fetchBookings,
-    fetchCancelReasons,
-    fetchDriverEarnings,
-    fetchEarningsReport,
-    fetchNotifications,
-    fetchPromos,
-    fetchUsers,
-    fetchWithdraws,
-    signOff,
-    fetchPaymentMethods,
-    fetchWalletHistory,
-    fetchCars,
-    fetchComplain,
-    fetchSMTP,
-    fetchSMSConfig,
-    fetchSos,
-    t
-  ]);
+  }, [dispatch, navigate]);
 
-  return settingsdata.loading ? (
-    <CircularLoading />
-  ) : settingsdata.settings ? (
-    auth.loading || !languagedata.langlist ? (
+  useEffect(() => {
+    checkUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN') {
+        if (session?.user) {
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (profileError) throw profileError;
+
+            dispatch(setUser({ ...session.user, profile }));
+            navigate('/dashboard');
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+            setError(error.message);
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        dispatch(clearUser());
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dispatch, navigate, checkUser]);
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      minHeight="100vh"
+      gap={2}
+    >
       <CircularLoading />
-    ) : (
-      props.children
-    )
-  ) : (
-    <div>
-      <span>No Database Settings found</span>
-  </div>
+      {error && (
+        <Typography color="error" variant="body1">
+          {error}
+        </Typography>
+      )}
+    </Box>
   );
 }
-
-export default AuthLoading;

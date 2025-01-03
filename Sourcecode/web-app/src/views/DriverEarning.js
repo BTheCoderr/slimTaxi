@@ -1,5 +1,5 @@
 import React,{ useState,useEffect } from 'react';
-import MaterialTable from 'material-table';
+import MaterialTable from '@material-table/core';
 import { useSelector } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { useTranslation } from "react-i18next";

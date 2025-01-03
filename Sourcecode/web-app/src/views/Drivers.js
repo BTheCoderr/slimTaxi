@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { downloadCsv } from "../common/sharedFunctions";
-import MaterialTable from "material-table";
+import MaterialTable from "@material-table/core";
 import { useSelector, useDispatch } from "react-redux";
 import CircularLoading from "../components/CircularLoading";
 import { api } from "common";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import moment from 'moment/min/moment-with-locales';
+import { formatDateTime, compareDates } from '../utils/dateUtils';
 import { colors } from "../components/Theme/WebTheme";
 import AlertDialog from "../components/AlertDialog";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -100,7 +100,7 @@ export default function Users() {
 
   useEffect(()=>{
     if(data){
-      SetSortedData(data.sort((a,b)=>(moment(b.createdAt) - moment(a.createdAt))))
+      SetSortedData(data.sort((a,b) => -compareDates(a.createdAt, b.createdAt)))
     }
   },[data])
 
@@ -130,7 +130,7 @@ export default function Users() {
   };
 
   const columns = [
-    { title: t('createdAt'), field: 'createdAt', editable:'never', defaultSort:'desc',render: rowData => rowData.createdAt? moment(rowData.createdAt).format('lll'):null,},
+    { title: t('createdAt'), field: 'createdAt', editable:'never', defaultSort:'desc',render: rowData => formatDateTime(rowData.createdAt), exportTransformer: rowData => formatDateTime(rowData.createdAt)},
 
     { title: t("first_name"), field: "firstName", initialEditValue: "" },
     { title: t("last_name"), field: "lastName", initialEditValue: "" },
